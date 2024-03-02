@@ -33,4 +33,7 @@ class IPNeuralNetwork(NeuralNetwork):
         Override this function to return self.number_of_batches batches created by workers
 		Hint: you can either generate (i.e sample randomly from the training data) the image batches here OR in Worker.run()
         '''
-        raise NotImplementedError("To be implemented")    
+
+        new_data = data
+
+        super().create_batches(new_data, labels, batch_size)

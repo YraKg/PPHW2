@@ -7,7 +7,13 @@
 # and Machine Learning" course (02360370), Winter 2024
 #
 import multiprocessing
+import numpy as np
+import scipy as sp
 
+imageDim = (28,28)
+vectorImageDim = (784,1)
+maxPixel = 255
+minPixel = 0
 
 class Worker(multiprocessing.Process):
     
@@ -46,7 +52,14 @@ class Worker(multiprocessing.Process):
         ------
         An numpy array of same shape
         '''
-        raise NotImplementedError("To be implemented")
+
+        reshaped = np.reshape(image, imageDim)
+
+        rotated = sp.ndimage.rotate(reshaped, angle)
+
+        return np.reshape(rotated, vectorImageDim)
+
+
 
     @staticmethod
     def shift(image, dx, dy):
@@ -65,7 +78,12 @@ class Worker(multiprocessing.Process):
         ------
         An numpy array of same shape
         '''
-        raise NotImplementedError("To be implemented")
+
+        reshaped = np.reshape(image,imageDim)
+
+        shifted = sp.ndimage.shift(reshaped, [dx, dy])
+
+        return np.reshape(shifted, vectorImageDim)
     
     @staticmethod
     def add_noise(image, noise):
@@ -84,7 +102,14 @@ class Worker(multiprocessing.Process):
         ------
         An numpy array of same shape
         '''
-        raise NotImplementedError("To be implemented")
+
+        added_noise = image + np.random.uniform(low=-noise, high=noise, size=vectorImageDim)
+
+        # take care of values that exceed [0,255] bounds
+        upper_bound = np.minimum(added_noise, 255)
+        lower_bound = np.maximum(upper_bound,0)
+
+        return lower_bound
 
     @staticmethod
     def skew(image, tilt):
@@ -101,7 +126,25 @@ class Worker(multiprocessing.Process):
         ------
         An numpy array of same shape
         '''
-        raise NotImplementedError("To be implemented")
+
+        result = np.reshape(image,imageDim)
+
+        rows, cols = imageDim
+
+        #if tilt is negative should iterate rows in inverted direction to use vals before update
+        neg_tilt = -1 if tilt < 0 else 1
+
+        for i in range(rows):
+            for j in range(0,cols,neg_tilt):
+
+                shifted_j = int(j+i*tilt)
+
+                if shifted_j >= cols or shifted_j < 0:
+                    result[i][j] = 0.
+                else:
+                    result[i][j] = result[i][shifted_j]
+
+        return np.reshape(result, vectorImageDim)
 
     def process_image(self, image):
         '''Apply the image process functions
