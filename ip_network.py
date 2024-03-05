@@ -6,6 +6,11 @@
 # "Concurrent and Distributed Programming for Data processing
 # and Machine Learning" course (02360370), Winter 2024
 #
+import math
+import multiprocessing
+import os
+import preprocessor as pp
+import my_queue
 from network import *
 
 class IPNeuralNetwork(NeuralNetwork):
@@ -14,19 +19,46 @@ class IPNeuralNetwork(NeuralNetwork):
         '''
         Override this function to create and destroy workers
         '''
+
+
         # 1. Create Workers
 		# (Call Worker() with self.mini_batch_size as the batch_size)
         for
         Worker( jobs, result, training_data, self.mini_batch_size)
-        
-		# 2. Set jobs
-		
+        data_queue = multiprocessing.JoinableQueue()
+        result_queue = my_queue.MyQueue()
+
+        num_workers = int(os.environ['SLURM_CPUS_PER_TASK'])
+        workers = [pp.Worker(data_queue,result_queue, self.mini_batch_size) for i in range(num_workers)]
+        for w in workers:
+            w.start()
+
+        # 2. Set jobs
+
+        for i in zip(training_data[0],training_data[1]):
+            data_queue.put(i)
+        for i in range(num_workers):
+            data_queue.put((None,None))
+
+        data_queue.join()
+
+        data = ([],[])
+        num_datapoints = len(training_data[0]) * self.mini_batch_size
+
+        while num_datapoints:
+            point = result_queue.get()
+            data[0].append(point[0])
+            data[1].append(point[1])
+            num_datapoints-=1
+
+
         # Call the parent's fit. Notice how create_batches is called inside super.fit().
-        super().fit(training_data, validation_data)
+        super().fit(data, validation_data)
         
         # 3. Stop Workers
-        
-        raise NotImplementedError("To be implemented")
+
+
+
         
         
     
@@ -36,6 +68,6 @@ class IPNeuralNetwork(NeuralNetwork):
 		Hint: you can either generate (i.e sample randomly from the training data) the image batches here OR in Worker.run()
         '''
 
-        new_data = data
+        size = math.ceil(len(data[1])/self.number_of_batches)
 
-        super().create_batches(new_data, labels, batch_size)
+        return super().create_batches(data, labels,size)

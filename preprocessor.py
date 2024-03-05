@@ -17,7 +17,7 @@ minPixel = 0
 
 class Worker(multiprocessing.Process):
     
-    def __init__(self, jobs, result, training_data, batch_size):
+    def __init__(self, jobs, result, batch_size):
         super().__init__()
 
         ''' Initialize Worker and it's members.
@@ -35,7 +35,11 @@ class Worker(multiprocessing.Process):
         
         You should add parameters if you think you need to.
         '''
-        raise NotImplementedError("To be implemented")
+
+        self.jobs = jobs
+        self.result =result
+
+        self.batch_size = batch_size
 
     @staticmethod
     def rotate(image, angle):
@@ -198,4 +202,14 @@ class Worker(multiprocessing.Process):
 		Hint: you can either generate (i.e sample randomly from the training data)
 		the image batches here OR in ip_network.create_batches
         '''
-        raise NotImplementedError("To be implemented")
+        num_augmentations = self.batch_size - 1
+
+        image, label = self.jobs.get()
+        while image:
+            for i in range(num_augmentations):
+                new_image = self.process_image(image)
+                new_labeled = (new_image, label)
+                self.result.put(new_labeled)
+            self.result.put((image,label))
+            image, label = self.jobs.get()
+
