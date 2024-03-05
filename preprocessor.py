@@ -159,7 +159,39 @@ class Worker(multiprocessing.Process):
         ------
         An numpy array of same shape
         '''
-        raise NotImplementedError("To be implemented")
+
+        # define range for preprocessing parameters
+        angle_range = [-22.5, 22.5]
+        shift_range_x = [-7.5,7.5]
+        shift_range_y = [-4.5,4.5]
+        noise_range = [0, 25]
+        tilt_range = [0.,2.]
+
+
+
+        # randomize parameters for preprocessing
+        angle = int(np.random.uniform(low=angle_range[0], high=angle_range[1]))
+        dx = int(np.random.uniform(low=shift_range_x[0], high=shift_range_x[1]))
+        dy = int(np.random.uniform(low=shift_range_y[0], high=shift_range_y[1]))
+        noise = int(np.random.uniform(low=noise_range[0], high=noise_range[1]))
+        tilt = int(np.random.uniform(low=tilt_range[0], high=tilt_range[1]))
+
+        # define order of preprocessing functions
+        order = [4, 2, 1, 3]
+
+        # run image through preprocessing functions in given order
+        for i in order:
+            if i == 1:
+                image = Worker.rotate(image,angle)
+            elif i == 2:
+                image = Worker.shift(image,dx,dy)
+            elif i == 3:
+                image = Worker.add_noise(image, noise)
+            elif i == 4:
+                image = Worker.skew(image,tilt)
+
+        return image
+
 
     def run(self):
         '''Process images from the jobs queue and add the result to the result queue.
