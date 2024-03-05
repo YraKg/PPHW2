@@ -16,6 +16,8 @@ class IPNeuralNetwork(NeuralNetwork):
         '''
         # 1. Create Workers
 		# (Call Worker() with self.mini_batch_size as the batch_size)
+        for
+        Worker( jobs, result, training_data, self.mini_batch_size)
         
 		# 2. Set jobs
 		
