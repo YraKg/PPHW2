@@ -18,8 +18,6 @@ class MyQueue(object):
         self.q = []
         self.len = 0
         self.writer_lock = Lock()
-        self.reader_lock = Lock()
-       # raise NotImplementedError("To be implemented")
 
     def put(self, msg):
         '''Put the given message in queue.
@@ -55,7 +53,6 @@ class MyQueue(object):
 
         return msg
 
-    
     def length(self):
         '''Get the number of messages currently in the queue
             
@@ -65,7 +62,6 @@ class MyQueue(object):
         '''
 
         return self.len
-
 
     def empty(self):
         return self.len == 0
