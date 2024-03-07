@@ -17,7 +17,8 @@ class MyQueue(object):
         '''
         self.q = []
         self.len = 0
-        self.lock = Lock()
+        self.writer_lock = Lock()
+        self.reader_lock = Lock()
        # raise NotImplementedError("To be implemented")
 
     def put(self, msg):
@@ -28,12 +29,13 @@ class MyQueue(object):
         msg : object
             the message to put.
         '''
+
+        self.writer_lock.acquire(block=True)
+
         self.q.insert(0, msg)
         self.len += 1
-        p = Pipe()
-        p.
 
-      #  raise NotImplementedError("To be implemented")
+        self.writer_lock.release()
 
     def get(self):
         '''Get the next message from queue (FIFO)
@@ -42,15 +44,17 @@ class MyQueue(object):
         ------
         An object
         '''
-        self.lock.acquire()
-        Pipe
-        try:
-           msg = self.q.pop()
-           self.len -= 1
-        finally:
-            self.lock.release()
-            return msg
-        #raise NotImplementedError("To be implemented")
+
+        while self.len == 0:
+            continue
+        self.writer_lock.acquire(block=True)
+        msg = self.q.pop()
+        self.len -= 1
+
+        self.writer_lock.release()
+
+        return msg
+
     
     def length(self):
         '''Get the number of messages currently in the queue
@@ -59,8 +63,9 @@ class MyQueue(object):
         ------
         An integer
         '''
+
         return self.len
-        #raise NotImplementedError("To be implemented")
+
 
     def empty(self):
         return self.len == 0
