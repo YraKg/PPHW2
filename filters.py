@@ -6,10 +6,12 @@
 # "Concurrent and Distributed Programming for Data processing
 # and Machine Learning" course (02360370), Winter 2024
 #
-from numba import cuda
-from numba import njit
+from numba import njit, cuda, prange
 import imageio
 import matplotlib.pyplot as plt
+import numpy as np
+
+
 
 def correlation_gpu(kernel, image):
     '''Correlate using gpu
@@ -24,10 +26,44 @@ def correlation_gpu(kernel, image):
     ------
     An numpy array of same shape as image
     '''
-    raise NotImplementedError("To be implemented")
+    kernel_global_mem = cuda.to_device(kernel)
+
+    image_global_mem = cuda.to_device(image)
+
+    result_global_mem = cuda.device_array((image.shape[0], image.shape[1]))
+
+    threadsperblock =  (32,32)
+
+    blockspergrid = (1,1)
+
+    correlation_kernel[blockspergrid, threadsperblock](kernel_global_mem, image_global_mem, result_global_mem)
+
+    result = result_global_mem.copy_to_host()
+    return result
 
 
-@njit
+@cuda.jit
+def correlation_kernel(kernel, image, result):
+
+
+
+@njit(parallel = True)
+def calc_correlation(kernel, image, image_row , image_column):  #gets the top left of a matrix as a parameter
+    sum = 0
+    curr_image_row = 0
+    curr_image_column = 0
+    for kernel_row in prange(kernel.shape[0]) :
+        curr_image_row = image_row + kernel_row
+        if(curr_image_row < 0 or curr_image_row > image.shape[0]):
+            continue
+        for kernel_column in prange(kernel.shape[1]):
+            curr_image_column = image_column + kernel_column
+            if(curr_image_column < 0 or curr_image_column > image.shape[1]):
+                continue
+            sum += kernel[kernel_row][kernel_column] * image[curr_image_row][curr_image_column]
+    return sum
+
+@njit(parallel = True)
 def correlation_numba(kernel, image):
     '''Correlate using numba
     Parameters
@@ -41,7 +77,16 @@ def correlation_numba(kernel, image):
     ------
     An numpy array of same shape as image
     '''
-    raise NotImplementedError("To be implemented")
+    result = np.zeros((image.shape[0], image.shape[1]))
+    top_left_row = 0
+    top_left_column = 0
+    for i in prange(image.shape[0]):
+        for j in prange(image.shape[1]):
+            #they wrote in the piazza that we are allowed to assume that the kernel matrix has an odd number of rows and columns
+            top_left_row = i - ((kernel.shape[0] - 1) / 2)
+            top_left_column = j - ((kernel.shape[1] - 1) / 2)
+            result[i][j] = calc_correlation(kernel, image, top_left_row, top_left_column)
+    return result
 
 
 def sobel_operator():

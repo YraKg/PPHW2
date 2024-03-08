@@ -20,11 +20,11 @@ class IPNeuralNetwork(NeuralNetwork):
         Override this function to create and destroy workers
         '''
 
+        num_augmentations = 10
+        #TODO: change this
 
         # 1. Create Workers
 		# (Call Worker() with self.mini_batch_size as the batch_size)
-        for
-        Worker( jobs, result, training_data, self.mini_batch_size)
         data_queue = multiprocessing.JoinableQueue()
         result_queue = my_queue.MyQueue()
 
@@ -43,7 +43,7 @@ class IPNeuralNetwork(NeuralNetwork):
         data_queue.join()
 
         data = ([],[])
-        num_datapoints = len(training_data[0]) * self.mini_batch_size
+        num_datapoints = len(training_data[0]) * num_augmentations
 
         while num_datapoints:
             point = result_queue.get()
@@ -67,7 +67,7 @@ class IPNeuralNetwork(NeuralNetwork):
         Override this function to return self.number_of_batches batches created by workers
 		Hint: you can either generate (i.e sample randomly from the training data) the image batches here OR in Worker.run()
         '''
-
+#TODO: need to add shuffle so that the batches will be iid
         size = math.ceil(len(data[1])/self.number_of_batches)
 
         return super().create_batches(data, labels,size)
