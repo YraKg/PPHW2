@@ -59,7 +59,7 @@ class Worker(multiprocessing.Process):
 
         reshaped = np.reshape(image, imageDim)
 
-        rotated = sp.ndimage.rotate(reshaped, angle)
+        rotated = sp.ndimage.rotate(reshaped, angle, reshape=False)
 
         return np.reshape(rotated, vectorImageDim)
 
@@ -205,7 +205,7 @@ class Worker(multiprocessing.Process):
         num_augmentations = self.batch_size - 1
 
         image, label = self.jobs.get()
-        while image:
+        while image is not None:
             for i in range(num_augmentations):
                 new_image = self.process_image(image)
                 new_labeled = (new_image, label)

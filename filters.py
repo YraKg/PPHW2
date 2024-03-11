@@ -33,7 +33,7 @@ def correlation_gpu(kernel, image):
 
     result_global_mem = cuda.device_array((image.shape[0], image.shape[1]))
 
-    threadsperblock =  (32,32)
+    threadsperblock =  (28,28)
 
     blockspergrid = (1,1)
 
@@ -46,22 +46,42 @@ def correlation_gpu(kernel, image):
 @cuda.jit
 def correlation_kernel(kernel, image, result):
 
+    tx = cuda.threadIdx.x
+    ty = cuda.threadIdx.y
 
+    image_row = tx - ((kernel.shape[0] - 1) / 2)
+    image_column = ty - ((kernel.shape[1] - 1) / 2)
+
+    sum = 0
+
+    for kernel_row in range(kernel.shape[0]):
+        curr_image_row = image_row + kernel_row
+        if (curr_image_row < 0 or curr_image_row >= image.shape[0]):
+            continue
+        for kernel_column in range(kernel.shape[1]):
+            curr_image_column = image_column + kernel_column
+            if (curr_image_column < 0 or curr_image_column >= image.shape[1]):
+                continue
+            sum += kernel[kernel_row][kernel_column] * image[curr_image_row][curr_image_column]
+
+    result[tx][ty] = sum
 
 @njit(parallel = True)
 def calc_correlation(kernel, image, image_row , image_column):  #gets the top left of a matrix as a parameter
     sum = 0
     curr_image_row = 0
     curr_image_column = 0
+
     for kernel_row in prange(kernel.shape[0]) :
         curr_image_row = image_row + kernel_row
-        if(curr_image_row < 0 or curr_image_row > image.shape[0]):
+        if(curr_image_row < 0 or curr_image_row >= image.shape[0]):
             continue
         for kernel_column in prange(kernel.shape[1]):
             curr_image_column = image_column + kernel_column
-            if(curr_image_column < 0 or curr_image_column > image.shape[1]):
+            if(curr_image_column < 0 or curr_image_column >= image.shape[1]):
                 continue
             sum += kernel[kernel_row][kernel_column] * image[curr_image_row][curr_image_column]
+
     return sum
 
 @njit(parallel = True)

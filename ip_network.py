@@ -20,7 +20,7 @@ class IPNeuralNetwork(NeuralNetwork):
         Override this function to create and destroy workers
         '''
 
-        num_augmentations = 10
+        num_augmentations = 1
         #TODO: change this
 
         # 1. Create Workers
@@ -28,8 +28,8 @@ class IPNeuralNetwork(NeuralNetwork):
         data_queue = multiprocessing.JoinableQueue()
         result_queue = my_queue.MyQueue()
 
-        num_workers = int(os.environ['SLURM_CPUS_PER_TASK'])
-        workers = [pp.Worker(data_queue,result_queue, self.mini_batch_size) for i in range(num_workers)]
+        num_workers = int(os.getenv('SLURM_CPUS_PER_TASK',1))
+        workers = [pp.Worker(data_queue,result_queue,num_augmentations) for i in range(num_workers)]
         for w in workers:
             w.start()
 
@@ -54,20 +54,20 @@ class IPNeuralNetwork(NeuralNetwork):
 
         # Call the parent's fit. Notice how create_batches is called inside super.fit().
         super().fit(data, validation_data)
-        
+
         # 3. Stop Workers
 
 
 
-        
-        
-    
+
+
+
     def create_batches(self, data, labels, batch_size):
         '''
         Override this function to return self.number_of_batches batches created by workers
 		Hint: you can either generate (i.e sample randomly from the training data) the image batches here OR in Worker.run()
         '''
-#TODO: need to add shuffle so that the batches will be iid
+
         size = math.ceil(len(data[1])/self.number_of_batches)
 
         return super().create_batches(data, labels,size)
