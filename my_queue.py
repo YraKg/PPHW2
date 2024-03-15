@@ -19,7 +19,7 @@ class MyQueue(object):
 
         self.writer_lock = Lock()
 
-        self.writer_lock.release()
+
     def put(self, msg):
         '''Put the given message in queue.
 
@@ -29,7 +29,8 @@ class MyQueue(object):
             the message to put.
         '''
 
-        self.writer_lock.acquire()
+        print("i am putting an image here")
+        self.writer_lock.acquire(block=True)
 
         self.p_w.send(msg)
 
@@ -43,10 +44,11 @@ class MyQueue(object):
         An object
         '''
 
+        print("i am getting an image")
         while self.empty():
             continue
 
-        self.writer_lock.acquire()
+        self.writer_lock.acquire(block=True)
 
         msg = self.p_r.recv()
 
@@ -65,5 +67,6 @@ class MyQueue(object):
     #     return self.len
 
     def empty(self):
-        return self.p_w.poll()
+        print("am i empty?"+str(not self.p_w.poll()))
+        return not self.p_w.poll()
 
