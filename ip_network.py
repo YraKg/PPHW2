@@ -26,6 +26,7 @@ class IPNeuralNetwork(NeuralNetwork):
         # 1. Create Workers
 		# (Call Worker() with self.mini_batch_size as the batch_size)
         data_queue = multiprocessing.JoinableQueue()
+
         result_queue = my_queue.MyQueue()
 
         num_workers = int(os.getenv('SLURM_CPUS_PER_TASK',1))
@@ -46,6 +47,9 @@ class IPNeuralNetwork(NeuralNetwork):
 
         data = ([],[])
         num_datapoints = len(training_data[0]) * num_augmentations
+        print("result queue length is " + str(result_queue.length()))
+
+        print("num datapoints is " + str(num_datapoints))
 
         while num_datapoints:
             point = result_queue.get()

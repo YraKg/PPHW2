@@ -6,8 +6,8 @@
 # "Concurrent and Distributed Programming for Data processing
 # and Machine Learning" course (02360370), Winter 2024
 #
-
-from multiprocessing import Process, Lock, Pipe
+import multiprocessing
+from multiprocessing import Process, Lock, Pipe, Queue
 import numpy as np
 from typing import List, Tuple
 class MyQueue(object):
@@ -15,10 +15,11 @@ class MyQueue(object):
     def __init__(self):
         ''' Initialize MyQueue and it's members.
         '''
-        self.q = []
-        self.len = 0
+        self.p_w, self.p_r = Pipe()
+
         self.writer_lock = Lock()
 
+        self.writer_lock.release()
     def put(self, msg):
         '''Put the given message in queue.
 
@@ -28,10 +29,9 @@ class MyQueue(object):
             the message to put.
         '''
 
-        self.writer_lock.acquire(block=True)
+        self.writer_lock.acquire()
 
-        self.q.insert(0, msg)
-        self.len += 1
+        self.p_w.send(msg)
 
         self.writer_lock.release()
 
@@ -43,26 +43,27 @@ class MyQueue(object):
         An object
         '''
 
-        while self.len == 0:
+        while self.empty():
             continue
-        self.writer_lock.acquire(block=True)
-        msg = self.q.pop()
-        self.len -= 1
+
+        self.writer_lock.acquire()
+
+        msg = self.p_r.recv()
 
         self.writer_lock.release()
 
         return msg
 
-    def length(self):
-        '''Get the number of messages currently in the queue
-            
-        Return
-        ------
-        An integer
-        '''
-
-        return self.len
+    # def length(self):
+    #     '''Get the number of messages currently in the queue
+    #
+    #     Return
+    #     ------
+    #     An integer
+    #     '''
+    #
+    #     return self.len
 
     def empty(self):
-        return self.len == 0
+        return self.p_w.poll()
 
