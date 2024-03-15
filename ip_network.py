@@ -30,8 +30,7 @@ class IPNeuralNetwork(NeuralNetwork):
 
         num_workers = int(os.getenv('SLURM_CPUS_PER_TASK',1))
         workers = [pp.Worker(data_queue,result_queue,num_augmentations) for i in range(num_workers)]
-        for w in workers:
-            w.start()
+
 
         # 2. Set jobs
 
@@ -39,6 +38,9 @@ class IPNeuralNetwork(NeuralNetwork):
             data_queue.put(i)
         for i in range(num_workers):
             data_queue.put((None,None))
+
+        for w in workers:
+            w.start()
 
         data_queue.join()
 
