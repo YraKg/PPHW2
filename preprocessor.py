@@ -11,7 +11,7 @@ import numpy as np
 import scipy as sp
 
 imageDim = (28,28)
-vectorImageDim = (784,1)
+vectorImageDim = (784)
 maxPixel = 255
 minPixel = 0
 
@@ -59,7 +59,7 @@ class Worker(multiprocessing.Process):
 
         reshaped = np.reshape(image, imageDim)
 
-        rotated = sp.ndimage.rotate(reshaped, angle, reshape=False)
+        rotated = sp.rotate(reshaped, angle, reshape=False)
 
         return np.reshape(rotated, vectorImageDim)
 
@@ -165,19 +165,17 @@ class Worker(multiprocessing.Process):
         '''
 
         # define range for preprocessing parameters
-        angle_range = [-22.5, 22.5]
-        shift_range_x = [-7.5,7.5]
-        shift_range_y = [-4.5,4.5]
-        noise_range = [0, 25]
-        tilt_range = [0.,2.]
-
-
+        angle_range = [-5, 6]
+        shift_range_x = [-2, 3]
+        shift_range_y = [-2, 3]
+        noise_range = [1, 20]
+        tilt_range = [0.0, 0.5]
 
         # randomize parameters for preprocessing
-        angle = int(np.random.uniform(low=angle_range[0], high=angle_range[1]))
-        dx = int(np.random.uniform(low=shift_range_x[0], high=shift_range_x[1]))
-        dy = int(np.random.uniform(low=shift_range_y[0], high=shift_range_y[1]))
-        noise = int(np.random.uniform(low=noise_range[0], high=noise_range[1]))
+        angle = int(np.random.randint(low=angle_range[0], high=angle_range[1]))
+        dx = int(np.random.randint(low=shift_range_x[0], high=shift_range_x[1]))
+        dy = int(np.random.randint(low=shift_range_y[0], high=shift_range_y[1]))
+        noise = int(np.random.randint(low=noise_range[0], high=noise_range[1]))
         tilt = int(np.random.uniform(low=tilt_range[0], high=tilt_range[1]))
 
         # define order of preprocessing functions

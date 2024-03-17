@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # initialize epoch
     epochs = 15
     start1 = time()
-
+    '''
     # initialize neural-net
     nn = NeuralNetwork(layers, learning_rate, mini_batch_size, number_of_batches, epochs)
 
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # testing neural network
     accuracy = (nn.validate(test_data) / len(test_data[0])) * 100
     print("Test Accuracy: " + str(accuracy) + "%")
-    
+    '''
     start1 = time()
     # initialize neural-net
     nn = IPNeuralNetwork(layers, learning_rate, mini_batch_size, number_of_batches, epochs)

@@ -15,7 +15,7 @@ class MyQueue(object):
     def __init__(self):
         ''' Initialize MyQueue and it's members.
         '''
-        self.p_w, self.p_r = Pipe()
+        self.p_r, self.p_w = Pipe()
 
         self.writer_lock = Lock()
 
@@ -29,13 +29,11 @@ class MyQueue(object):
             the message to put.
         '''
 
-        try:
-            self.writer_lock.acquire(block=True)
-            self.p_w.send(msg)
-            print("i am putting an image here")
-        finally:
-            print("i release after putting")
-            self.writer_lock.release()
+
+        self.writer_lock.acquire(block=True)
+        self.p_w.send(msg)
+        print("i am putting an image here")
+        self.writer_lock.release()
 
     def get(self):
         '''Get the next message from queue (FIFO)
@@ -44,15 +42,10 @@ class MyQueue(object):
         ------
         An object
         '''
-        print("i am getting an image")
-        while self.empty():
-            continue
 
-        try:
-            self.writer_lock.acquire(block=True)
-            msg = self.p_r.recv()
-        finally:
-            self.writer_lock.release()
+
+        print("i am getting an image")
+        msg = self.p_r.recv()
 
         return msg
 
@@ -67,6 +60,6 @@ class MyQueue(object):
     #     return self.len
 
     def empty(self):
-        print("am i empty?"+str(not self.p_w.poll()))
-        return not self.p_w.poll()
+
+        return not self.p_r.poll()
 

@@ -11,6 +11,7 @@ import multiprocessing
 import os
 import preprocessor as pp
 import my_queue
+import numpy as np
 from network import *
 
 class IPNeuralNetwork(NeuralNetwork):
@@ -20,7 +21,7 @@ class IPNeuralNetwork(NeuralNetwork):
         Override this function to create and destroy workers
         '''
 
-        num_augmentations = 1
+        num_augmentations = 3
         #TODO: change this
 
         # 1. Create Workers
@@ -47,7 +48,7 @@ class IPNeuralNetwork(NeuralNetwork):
 
         data = ([],[])
         num_datapoints = len(training_data[0]) * num_augmentations
-        print("result queue length is " + str(result_queue.length()))
+        #print("result queue length is " + str(result_queue.length()))
 
         print("num datapoints is " + str(num_datapoints))
 
@@ -59,7 +60,7 @@ class IPNeuralNetwork(NeuralNetwork):
 
         data_queue.join()
         # Call the parent's fit. Notice how create_batches is called inside super.fit().
-        super().fit(data, validation_data)
+        super().fit((np.array(data[0]), np.array(data[1])), validation_data)
 
         # 3. Stop Workers
 
@@ -76,4 +77,4 @@ class IPNeuralNetwork(NeuralNetwork):
 
         size = math.ceil(len(data[1])/self.number_of_batches)
 
-        return super().create_batches(data, labels,size)
+        return super().create_batches(data, labels,batch_size)
