@@ -33,11 +33,12 @@ def correlation_gpu(kernel, image):
 
     result_global_mem = cuda.device_array((image.shape[0], image.shape[1]))
 
-    threadsperblock =  (28,28)
+    threadsperblock =  image.shape[1]
 
-    blockspergrid = (1,1)
+    blockspergrid = image.shape[0]
 
     correlation_kernel[blockspergrid, threadsperblock](kernel_global_mem, image_global_mem, result_global_mem)
+
 
     result = result_global_mem.copy_to_host()
     return result
@@ -46,8 +47,8 @@ def correlation_gpu(kernel, image):
 @cuda.jit
 def correlation_kernel(kernel, image, result):
 
-    tx = cuda.threadIdx.x
-    ty = cuda.threadIdx.y
+    ty = cuda.threadIdx.x
+    tx = cuda.blockIdx.x
 
     image_row = tx - ((kernel.shape[0] - 1) / 2)
     image_column = ty - ((kernel.shape[1] - 1) / 2)
@@ -72,7 +73,7 @@ def calc_correlation(kernel, image, image_row , image_column):  #gets the top le
     curr_image_row = 0
     curr_image_column = 0
 
-    for kernel_row in prange(kernel.shape[0]) :
+    for kernel_row in prange(kernel.shape[0]):
         curr_image_row = image_row + kernel_row
         if(curr_image_row < 0 or curr_image_row >= image.shape[0]):
             continue
@@ -98,14 +99,15 @@ def correlation_numba(kernel, image):
     ------
     An numpy array of same shape as image
     '''
+    print('hello world')
     result = np.zeros((image.shape[0], image.shape[1]))
     top_left_row = 0
     top_left_column = 0
     for i in prange(image.shape[0]):
         for j in prange(image.shape[1]):
             #they wrote in the piazza that we are allowed to assume that the kernel matrix has an odd number of rows and columns
-            top_left_row = i - ((kernel.shape[0] - 1) / 2)
-            top_left_column = j - ((kernel.shape[1] - 1) / 2)
+            top_left_row = int(i - ((kernel.shape[0] - 1) / 2))
+            top_left_column = int(j - ((kernel.shape[1] - 1) / 2))
             result[i][j] = calc_correlation(kernel, image, top_left_row, top_left_column)
     return result
 

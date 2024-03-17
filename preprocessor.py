@@ -165,10 +165,10 @@ class Worker(multiprocessing.Process):
         '''
 
         # define range for preprocessing parameters
-        angle_range = [-5, 6]
-        shift_range_x = [-2, 3]
-        shift_range_y = [-2, 3]
-        noise_range = [1, 20]
+        angle_range = [-15, 15]
+        shift_range_x = [-1, 2]
+        shift_range_y = [-1, 2]
+        noise_range = [1, 1]
         tilt_range = [0.0, 0.5]
 
         # randomize parameters for preprocessing
