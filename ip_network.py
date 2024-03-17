@@ -43,7 +43,7 @@ class IPNeuralNetwork(NeuralNetwork):
         for w in workers:
             w.start()
 
-        data_queue.join()
+
 
         data = ([],[])
         num_datapoints = len(training_data[0]) * num_augmentations
@@ -57,7 +57,7 @@ class IPNeuralNetwork(NeuralNetwork):
             data[1].append(point[1])
             num_datapoints-=1
 
-
+        data_queue.join()
         # Call the parent's fit. Notice how create_batches is called inside super.fit().
         super().fit(data, validation_data)
 

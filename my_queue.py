@@ -29,30 +29,30 @@ class MyQueue(object):
             the message to put.
         '''
 
-        print("i am putting an image here")
-        self.writer_lock.acquire(block=True)
-
-        self.p_w.send(msg)
-
-        self.writer_lock.release()
+        try:
+            self.writer_lock.acquire(block=True)
+            self.p_w.send(msg)
+            print("i am putting an image here")
+        finally:
+            print("i release after putting")
+            self.writer_lock.release()
 
     def get(self):
         '''Get the next message from queue (FIFO)
-            
+
         Return
         ------
         An object
         '''
-
         print("i am getting an image")
         while self.empty():
             continue
 
-        self.writer_lock.acquire(block=True)
-
-        msg = self.p_r.recv()
-
-        self.writer_lock.release()
+        try:
+            self.writer_lock.acquire(block=True)
+            msg = self.p_r.recv()
+        finally:
+            self.writer_lock.release()
 
         return msg
 
