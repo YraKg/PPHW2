@@ -75,9 +75,10 @@ def corr_comparison():
 
     print('CPU 3X3 kernel:', timer(shapen_kernel, correlation_cpu))
     print('Numba 3X3 kernel:', timer(shapen_kernel, correlation_numba))
-    print('CUDA 3X3 kernel:', timer(shapen_kernel, correlation_gpu))
+'''    print('CUDA 3X3 kernel:', timer(shapen_kernel, correlation_gpu))
     print("---------------------------------------------")
-    
+    print( (convolve2d(image, shapen_kernel, mode='same')==correlation_cpu(shapen_kernel,image)).all() )
+
     print('CPU 5X5 kernel:', timer(blur_kernel, correlation_cpu))
     print('Numba 5X5 kernel:', timer(blur_kernel, correlation_numba))
     print('CUDA 5X5 kernel:', timer(blur_kernel, correlation_gpu))
@@ -88,11 +89,12 @@ def corr_comparison():
     print('CUDA 7X7 kernel:', timer(edge_kernel, correlation_gpu))
     print("---------------------------------------------")
 
+'''
 
 if __name__ == '__main__':
     os.environ['NUMBAPRO_NVVM'] = '/usr/local/cuda-9.0/nvvm/lib64/libnvvm.so'
     os.environ['NUMBAPRO_LIBDEVICE'] = '/usr/local/cuda-9.0/nvvm/libdevice/'
-    corr_comparison()
+    #corr_comparison()
 
     res = sobel_operator()
     show_image(res)

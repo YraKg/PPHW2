@@ -1,21 +1,21 @@
 #
 #   @date:  [TODO: Today's date]
 #   @author: [TODO: Student Names]
-#
+
 # This file is for the solutions of the wet part of HW2 in
 # "Concurrent and Distributed Programming for Data processing
 # and Machine Learning" course (02360370), Winter 2024
 #
 from numba import njit, cuda, prange
 import imageio
+
 import matplotlib.pyplot as plt
 import numpy as np
-import numpy as np
 
 
-
+'''
 def correlation_gpu(kernel, image):
-    '''Correlate using gpu
+    ''''''Correlate using gpu
     Parameters
     ----------
     kernel : numpy array
@@ -26,7 +26,7 @@ def correlation_gpu(kernel, image):
     Return
     ------
     An numpy array of same shape as image
-    '''
+    ''''''
     kernel_global_mem = cuda.to_device(kernel)
 
     image_global_mem = cuda.to_device(image)
@@ -56,29 +56,29 @@ def correlation_kernel(kernel, image, result):
     sum = 0
 
     for kernel_row in range(kernel.shape[0]):
-        curr_image_row = image_row + kernel_row
+        curr_image_row = image_row + kernel_row# - int((kernel.shape[0] - 1) / 2)
         if (curr_image_row < 0 or curr_image_row >= image.shape[0]):
             continue
         for kernel_column in range(kernel.shape[1]):
-            curr_image_column = image_column + kernel_column
+            curr_image_column = image_column + kernel_column# - int((kernel.shape[1] - 1) / 2)
             if (curr_image_column < 0 or curr_image_column >= image.shape[1]):
                 continue
             sum += kernel[kernel_row][kernel_column] * image[curr_image_row][curr_image_column]
 
     result[tx][ty] = sum
-
-@njit(parallel = True)
+'''
+@njit(parallel = False)
 def calc_correlation(kernel, image, image_row , image_column):  #gets the top left of a matrix as a parameter
-    sum = 0
+    sum = 0.0
     curr_image_row = 0
     curr_image_column = 0
 
     for kernel_row in prange(kernel.shape[0]):
-        curr_image_row = image_row + kernel_row
+        curr_image_row = image_row + kernel_row #- int((kernel.shape[0] - 1) / 2)
         if(curr_image_row < 0 or curr_image_row >= image.shape[0]):
             continue
         for kernel_column in prange(kernel.shape[1]):
-            curr_image_column = image_column + kernel_column
+            curr_image_column = image_column + kernel_column #- int((kernel.shape[1] - 1) / 2)
             if(curr_image_column < 0 or curr_image_column >= image.shape[1]):
                 continue
             sum += kernel[kernel_row][kernel_column] * image[curr_image_row][curr_image_column]
@@ -99,7 +99,7 @@ def correlation_numba(kernel, image):
     ------
     An numpy array of same shape as image
     '''
-    print('hello world')
+
     result = np.zeros((image.shape[0], image.shape[1]))
     top_left_row = 0
     top_left_column = 0
@@ -124,10 +124,10 @@ def sobel_operator():
 
     kernel_0 = np.array([[1,0,-1],[2,0,-2],[1,0,-1]])
     kernel_1 = np.array([[3,0,-3],[10,0,-10],[3,0,-3]])
-    kernel_2 = np.array([[1,0,-1],[2,0,-2],[1,0,-1],[2,0,-2],[1,0,-1]])
-    kernel_4 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
+    kernel_2 = np.array([[1,0,-1],[2,0,-1],[1,0,-2],[2,0,-2],[1,0,-1]])
+    kernel_3 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
 
-    sobel_filter = kernel_0
+    sobel_filter = kernel_2
 
     G_x = correlation_numba(sobel_filter, pic)
     G_y = correlation_numba(np.transpose(sobel_filter), pic)
@@ -136,7 +136,8 @@ def sobel_operator():
     G_y_2 = np.square(G_y)
     G_sum = G_x_2 + G_y_2
     G_sqrt = np.sqrt(G_sum)
-
+    print(pic.shape)
+    print(G_sqrt.shape)
     return G_sqrt
 
 
